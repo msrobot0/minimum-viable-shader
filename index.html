@@ -1,0 +1,89 @@
+<html>
+<head>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r71/three.min.js"></script>
+	<style>
+		/* We want our scene to span the entire window */
+		body { margin: 0; }
+	</style>
+</head>
+<body>
+	<script id="fragShader" type="shader-code">
+uniform vec2 resolution;//Uniform variables must be declared here first
+uniform sampler2D texture;
+void main() {
+    //Now we can normalize our coordinate
+    vec2 pos = gl_FragCoord.xy / resolution.xy;
+    //And create a gradient!
+    if  (pos.x < .5){ 
+        gl_FragColor = vec4(1.0,pos.x,pos.y,1.0);
+
+}else{
+        gl_FragColor = texture2D(texture,pos);
+
+
+}
+}
+
+</script>
+
+	<script>
+		
+		//@author Omar Shehata. 2015.
+		//We are loading the Three.js library from the cdn here: http://cdnjs.com/libraries/three.js/
+		var scene;
+		var camera;
+		var renderer;
+
+		function scene_setup(){
+			//This is all code needed to set up a basic ThreeJS scene
+
+			//First we initialize the scene and our camera
+			scene = new THREE.Scene();
+			camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+
+			//We create the WebGL renderer and add it to the document
+			renderer = new THREE.WebGLRenderer();
+			renderer.setSize( window.innerWidth, window.innerHeight );
+			document.body.appendChild( renderer.domElement );
+		}
+
+		scene_setup();
+
+		var geometry = new THREE.BoxGeometry( 1, 1, 1 );
+		THREE.ImageUtils.crossOrigin = '';//Allows us to load an external image
+var tex = THREE.ImageUtils.loadTexture( "https://images.pexels.com/photos/248797/pexels-photo-248797.jpeg?cs=srgb&dl=beach-exotic-holiday-248797.jpg&fm=jpg");//"http://127.0.0.1:8080/bb248b9500c49472c78963fdb1710d77.gif");//"file:///Users/Parmenides/Desktop/bb248b9500c49472c78963fdb1710d77.gif");//"https://gfycat.com/assets/bb248b9500c49472c78963fdb1710d77.gif");//"https://tutsplus.github.io/Beginners-Guide-to-Shaders/Part2/SIPI_Jelly_Beans.jpg" );
+
+		var uniforms = {};
+		uniforms.texture = {type:'t',value:tex};
+		uniforms.resolution = {type:'v2',value:new THREE.Vector2(window.innerWidth,window.innerHeight)};
+var shaderCode = document.getElementById("fragShader").innerHTML;
+var material = new THREE.ShaderMaterial({uniforms:uniforms,fragmentShader:shaderCode})
+		//	var material = new THREE.MeshBasicMaterial( { color: 0x00ff00} );//We make it green
+		var cube = new THREE.Mesh( geometry, material );
+		//Add it to the screen
+		scene.add( cube );
+		cube.position.z = -3;//Shift the cube back so we can see it
+		
+		
+/*
+var material = new THREE.ShaderMaterial({uniforms:uniforms,fragmentShader:shaderCode})
+
+var geometry = new THREE.PlaneBufferGeometry( 10, 10 );
+var sprite = new THREE.Mesh( geometry,material );
+scene.add( sprite );
+sprite.position.z = -1;//Move it back so we can see it
+*/
+		//Render everything!
+		
+		function render() {
+			cube.rotation.x += 0.02;
+    
+			requestAnimationFrame( render );
+			renderer.render( scene, camera );
+		}
+		render();
+		
+	</script>
+
+</body>
+</html>
